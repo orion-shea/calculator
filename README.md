@@ -1,4 +1,2 @@
 # project-0
-Learning git
-
-And adding to my README
+I've learned the basics of git, now I want to start working on my project. Today is June, 23.
