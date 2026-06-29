@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="style.css"> <!--Link to the stylesheet in <head>-->
     <title>Page Title: Calculator App</title>
+    <link rel="stylesheet" href="style.css"> <!--Link to the stylesheet in <head>-->
+    <script src="script.js" defer></script> <!--Link to the script in <head>-->
+    <!-- The defer keyword makes sure the script is executed after the HTML is parsed -->
 </head>
 <body>
     <h1>Calculator (h1)</h1>
     <div class="button-grid">
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>+</button>
-        <button>4</button>
-        <button>5</button>
-        <button>6</button>
-        <button>-</button>
-        <button>7</button>
-        <button>8</button>
-        <button>9</button>
-        <button>*</button>
-        <button>C</button>
-        <button>0</button>
-        <button>=</button>
-        <button>/</button>
+        <button id="btn1" onclick="btn(this.id)">1</button>
+        <button id="btn2" onclick="btn(this.id)">2</button>
+        <button id="btn3" onclick="btn(this.id)">3</button>
+        <button id="btnAdd" onclick="btn(this.id)">+</button>
+        <button id="btn4" onclick="btn(this.id)">4</button>
+        <button id="btn5" onclick="btn(this.id)">5</button>
+        <button id="btn6" onclick="btn(this.id)">6</button>
+        <button id="btnSubtract" onclick="btn(this.id)">-</button>
+        <button id="btn7" onclick="btn(this.id)">7</button>
+        <button id="btn8" onclick="btn(this.id)">8</button>
+        <button id="btn9" onclick="btn(this.id)">9</button>
+        <button id="btnMultiply" onclick="btn(this.id)">*</button>
+        <button id="btnC" onclick="btn(this.id)">C</button>
+        <button id="btn0" onclick="btn(this.id)">0</button>
+        <button id="btnEquals" onclick="btn(this.id)">=</button>
+        <button id="btnDivide" onclick="btn(this.id)">/</button>
     </div>
 </body>
 </html>
