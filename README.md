@@ -1,4 +1,2 @@
 # project-0
-Learning git
-
-And adding to my README
+I am going to make a calculator for my very first project.
