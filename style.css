@@ -2,17 +2,6 @@ body {
     background-color: rgb(100, 201, 232);
 }
 
-h1 {
-    color:  #f2ff00;
-    text-align: center;
-}
-
-p {
-    font-family: verdana;
-    font-size: 20px;
-    text-align: center;
-}
-
 .calculator-display {
     display: flex;
     flex-direction: column;
@@ -21,6 +10,7 @@ p {
     margin-top: 50px;
     font-family: 'Times New Roman', Times, serif;
     font-size: 40px;
+    border: 1px solid black;
 }
 
 .calculator-buttons {
@@ -28,6 +18,10 @@ p {
   grid-template-columns: repeat(4, 1fr);
   gap: 10px 10px;
   
+}
+
+#btnEquals {
+    background-color:rgb(226, 43, 43)
 }
 
 button {
