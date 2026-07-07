@@ -2,17 +2,11 @@
     Notes:
     Instead of 1 central function, I should split up into different tasks.
     Also wanting to fix variable names. How do I do that efficiently?
-        -accumulator -> expression
-        -dot -> decimalUsed
-        -parenOpen -> unclosedParen?
-        -untouched -> initialZero?
 
     For next time..
     I want to add negative functionality
     I want to finally start figuring out the API and backend.
 */
-
-
 
 //clicks only listen when they're inside the calculator-buttons div.
 document.querySelector('.calculator-buttons').addEventListener('click', f);
@@ -29,31 +23,27 @@ document.addEventListener('keydown', f);
     things on the same page. cool!
 */
 
-
-
-let accumulator = '0'; // Make it a string to hold both nums and symbols.
-document.getElementById('display').innerHTML =  accumulator; 
+let expression = '0'; // Make it a string to hold both nums and symbols.
 // Immediately show 0 on the display (and at all times when the display is empty).
+document.getElementById('display').innerHTML =  expression; 
 
-let untouched = true; // for parenthesis stuff - lets me type 0 at the start and
+let initialZero = true; // for parenthesis stuff - lets me type 0 at the start and
 // then follow it with a paren to keep 0(a + b), etc. that's if I touch the
 // 0. If untouched, which will be default, the paren will simply replace 0.
-
-let parenOpen = [false]; // flag for parenthesis.
-
-let dot = false; // flag for decimal point.
+let decimalUsed = false; // flag for decimal point.
+let unclosedParen = [false]; // flag for parenthesis.
 
 
 
-function f(event) {    
+async function f(event) {    
     // tracks current value of button pressed (or key pressed).
     let buttonValue = ''; 
     //an array storing booleans. if all true, input can be garbage free.
     //this can help me avoid invalid expressions, like two operators in a row, etc.
-    let garbageFree = [accumulator[accumulator.length - 1] != ' ',
-                        accumulator[accumulator.length - 1] != '.',
-                        accumulator[accumulator.length - 1] != '(',
-                        accumulator[accumulator.length - 1] != '^'];
+    let garbageFree = [expression[expression.length - 1] != ' ',
+                        expression[expression.length - 1] != '.',
+                        expression[expression.length - 1] != '(',
+                        expression[expression.length - 1] != '^'];
 
     
 
@@ -63,7 +53,7 @@ function f(event) {
     }
     if(event.type === 'keydown') {
         if (event.key === 'Enter') {
-            event.preventDefault();
+            event.preventDefault(); //weird bug with enter, i stop it w this
         }
         buttonValue = event.key;
     }
@@ -76,15 +66,14 @@ function f(event) {
         buttonValue = '÷';
     }
 
-    console.log(buttonValue);
 
 
     // switch statement taking care of logic for each button/key pressed.
     switch(buttonValue) {
         case '0':
             // if i manually type 0 at the start, it means i touched
-            if(untouched) { 
-                untouched = false;
+            if(initialZero) { 
+                initialZero = false;
             }
         case '1':
         case '2':
@@ -96,12 +85,12 @@ function f(event) {
         case '8':
         case '9':
             // if display is just 0, always replace with the new number.
-            if(accumulator === '0') {
-                accumulator = buttonValue;
+            if(expression === '0') {
+                expression = buttonValue;
             }
             //otherwise, add that number onto the expression.
             else {
-                accumulator += buttonValue;
+                expression += buttonValue;
             }
             break;
         case '+':
@@ -112,43 +101,42 @@ function f(event) {
             // trying to be fancy like google and replace operators w/ each other
             if(!garbageFree[0]) {
                 // accumulator = itself - 2 characters, then add val and a space.
-                accumulator =  accumulator.slice(0, -2) + buttonValue + ' ';
+                expression =  expression.slice(0, -2) + buttonValue + ' ';
             }
             // only execute if there isn't garbage right before this input.
             else if(garbageFree.every(Boolean)) {
                 //adding space buffer for visual improvement
-                accumulator += ' ' + buttonValue + ' ';
-                dot = false; // reset decimal point flag after an operator.
+                expression += ' ' + buttonValue + ' ';
+                decimalUsed = false; // reset decimal point flag after an operator.
             }
-            console.log(accumulator);
             break;
         case '.':
             // only let me decimal if there isn't garbo right b4
             if(garbageFree.every(Boolean)) {
-                if(dot === false) { 
-                    accumulator += buttonValue;
+                if(decimalUsed === false) { 
+                    expression += buttonValue;
                 }    
-            dot = true; // flag to indicate that a decimal point has been added.
+            decimalUsed = true; // flag to indicate that a decimal point has been added.
             }
             
             break;
         case '(':
-            if(accumulator === '0' && untouched === true) {
-                accumulator = buttonValue; //if is the initial 0, just replace it.
+            if(expression === '0' && initialZero === true) {
+                expression = buttonValue; //if is the initial 0, just replace it.
             }
             else {
-                accumulator += buttonValue; //otherwise, add paren onto the displayed expr.
+                expression += buttonValue; //otherwise, add paren onto the displayed expr.
             }
             // paren flag magic
-            if(!parenOpen[0]) { 
+            if(!unclosedParen[0]) { 
                 //if the first val of paren is false, this means that no parens
                 //have been opened yet. so change it to true to indicate first open
-                parenOpen = [true];
+                unclosedParen = [true];
             }
             else {
                 //otherwise, this means that a paren is already open and hasn't
                 //been closed yet. so, just add another open one to the list.
-                parenOpen.push(true);
+                unclosedParen.push(true);
             } 
             /* 
             Google also adds the ending parenthesis (greyed out) automatically.
@@ -156,21 +144,21 @@ function f(event) {
             i + 1, and we continue adding characters at position i until
             we input ending paren, closing the parens.
             */
-            dot = false; // reset decimal point flag after an open paren.
+            decimalUsed = false; // reset decimal point flag after an open paren.
             break;
         case ')':
             // same as operators, only execute if there isn't garb right b4
             if(garbageFree.every(Boolean)) {
                 //if there is still an opening paren that hasn't been closed, go:
-                if(parenOpen[0] === true) {
-                    parenOpen.pop(); //pop the last true to close 1 opening paren.  
-                    accumulator += buttonValue;
-                    dot = false; // reset decimal point flag after a close paren.
+                if(unclosedParen[0] === true) {
+                    unclosedParen.pop(); //pop the last true to close 1 opening paren.  
+                    expression += buttonValue;
+                    decimalUsed = false; // reset decimal point flag after a close paren.
                 }
                 // if we just popped the last true and the list is empty, reset
                 // this means all opening parens have been closed.
-                if(parenOpen.length === 0) {
-                    parenOpen = [false];
+                if(unclosedParen.length === 0) {
+                    unclosedParen = [false];
                 }
             }
             break;
@@ -178,80 +166,105 @@ function f(event) {
 
         case '^':
             if(garbageFree.every(Boolean)) {
-                accumulator += buttonValue;
+                expression += buttonValue;
             }
             break;
 
 
         case 'Backspace':
             //backspace with just 1 digit left should reset to 0, not empty string.
-            if(accumulator.length === 1) {
-                accumulator = '0';
-                dot = false; // reset decimal point flag after clearing.
-                parenOpen.length = 0;
-                parenOpen = [false]; // reset parenthesis flag after clearing.
-                untouched = true; // reset this flag too.
+            if(expression.length === 1) {
+                expression = '0';
+                decimalUsed = false; // reset decimal point flag after clearing.
+                unclosedParen.length = 0;
+                unclosedParen = [false]; // reset parenthesis flag after clearing.
+                initialZero = true; // reset this flag too.
             }
-            else if(accumulator[accumulator.length - 1] === ' ') {
+            else if(expression[expression.length - 1] === ' ') {
                 //document.getElementById('display').innerHTML = accumulator.slice(0, -3);
-                accumulator = accumulator.slice(0, -3);
+                expression = expression.slice(0, -3);
             }
             //Dot Logic
-            else if(accumulator[accumulator.length - 1] === '.') {
-                dot = false;
-                accumulator = accumulator.slice(0, -1);
+            else if(expression[expression.length - 1] === '.') {
+                decimalUsed = false;
+                expression = expression.slice(0, -1);
             }
 
             //Parenthesis logic
-            else if(accumulator[accumulator.length - 1] === '(') {
-                if(parenOpen.length === 1) {
-                    parenOpen = [false];
+            else if(expression[expression.length - 1] === '(') {
+                if(unclosedParen.length === 1) {
+                    unclosedParen = [false];
                 }
                 else { 
-                    parenOpen.pop();
+                    unclosedParen.pop();
                 }
-                console.log('parenOpen: ' + parenOpen);
-                accumulator = accumulator.slice(0, -1);
+                expression = expression.slice(0, -1);
             }
-            else if(accumulator[accumulator.length - 1] === ')') {
-                if(!parenOpen[0]) {
-                    parenOpen = [true];
+            else if(expression[expression.length - 1] === ')') {
+                if(!unclosedParen[0]) {
+                    unclosedParen = [true];
                 }
                 else {
-                    parenOpen.push(true);
+                    unclosedParen.push(true);
                 }
-                console.log('parenOpen: ' + parenOpen);
-                accumulator = accumulator.slice(0, -1);
+                expression = expression.slice(0, -1);
             }
 
 
             //otherwise, cut off the last character of the accumulator string.
             else {
-                accumulator = accumulator.slice(0, -1);
+                expression = expression.slice(0, -1);
             }
             break;
         case 'c':
         case 'C':
-            accumulator = '0';
-            dot = false; // reset decimal point flag after clearing.
-            parenOpen.length = 0;
-            parenOpen = [false]; // reset parenthesis flag after clearing.
-            untouched = true; //reset this too
+            expression = '0';
+            decimalUsed = false; // reset decimal point flag after clearing.
+            unclosedParen.length = 0;
+            unclosedParen = [false]; // reset parenthesis flag after clearing.
+            initialZero = true; //reset this too
             break;
         case '=':
         case 'Enter':
             //run only if valid end to expression
             if(garbageFree.every(Boolean)) {
-                console.log('equals: ' + accumulator);
-                accumulator = accumulator[0];
-                dot = false; // reset decimal point flag after evaluation.
-                parenOpen.length = 0;
-                parenOpen = [false]; // reset parenthesis flag after evaluation.
-                untouched = true; //reset it too
+                //normalize everything into ascii
+                if (expression.includes('×') || expression.includes('÷')) {
+                    //ONLY REPLACES THE FIRST MULT OR DIV. FIX LATER
+                    expression = expression.replace('×', '*').replace('÷', '/');
+                }
+                /* Great way to normalize the expression here.
+                let payload = expression
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/\s+/g, '');
+                */
+                expression = await evaluate(expression);
+                decimalUsed = false; // reset decimal point flag after evaluation.
+                unclosedParen.length = 0;
+                unclosedParen = [false]; // reset parenthesis flag after evaluation.
+                // idk if this is needed -> initialZero = true; //reset it too
             }
             break;
         default:
     }
-    //CHANGED TO =ACCUMULATOR INSTEAD OF =DISPLAY TO TEST
-    document.getElementById('display').innerHTML =  accumulator;
+    document.getElementById('display').innerHTML =  expression;
+}
+
+
+async function evaluate(expression) {
+  try {
+    const response = await fetch(`/calculate?expression=${encodeURIComponent(expression)}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const result = await response.text(); // or .json() if server returns JSON
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    throw error; // optional: let the caller handle it
+  }
 }
