@@ -69,6 +69,7 @@ int main() {
         std::string expression = req.get_param_value("expression");
         double result = eval(expression);
         std::string r = trim_zeros(result);
+        std::string p = pemdas(expression);
 
         res.set_content(r, "text/plain");
 });

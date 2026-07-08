@@ -1,5 +1,6 @@
 #include <iostream>
 #include "calculator.h"
+#include "stack.h"
 
 double addition(double a, double b) {
     return a + b;
@@ -23,6 +24,26 @@ double division(double a, double b) {
 
 std::string pemdas(std::string expression) {
     // Learn Dijkstra's shunting algorithm
+
+
+    //Create the stack and push if operator  
+    Stack s;
+    for(int i = 0; i < expression.length(); i++) {
+        switch (expression[i]) {
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+                s.push(expression[i]);
+                std::cout << "pushed" << expression[i] << std::endl;
+                break;
+            case ' ':
+                break;
+            default:
+                //number stuff
+        }
+    }
+    return expression;
 }
 
 double eval(std::string expression) {
