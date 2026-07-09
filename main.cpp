@@ -2,7 +2,7 @@
 #include "httplib.h" // header that lets me make a server. I downloaded it from GH
 #include <fstream>
 #include <sstream>
-#include "stack.h" //header with my stack code
+#include "data_structures.h" //header with my stack code
 #include "calculator.h" // takes care of the math stuff
 
 //idk
@@ -67,9 +67,8 @@ int main() {
 
     svr.Get("/calculate", [](const httplib::Request& req, httplib::Response& res) {
         std::string expression = req.get_param_value("expression");
-        double result = eval(expression);
+        double result = pemdas(expression);
         std::string r = trim_zeros(result);
-        std::string p = pemdas(expression);
 
         res.set_content(r, "text/plain");
 });
