@@ -11,5 +11,5 @@ data_structures.cpp contains my implementations of the stack and queue data stru
 
 index.html and style.css are my frontend visual design.
 
-script.js is my calculator display and button logic, as well as talking to the backend. maybe I should split this up into 2 files? calculator display/button logic and then the API stuff?
+script.js is my calculator display and button logic, as well as talking to the backend.
 

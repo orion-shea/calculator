@@ -1,6 +1,3 @@
-#ifndef DATA_STRUCTURES_H
-#define DATA_STRUCTURES_H
-
 #pragma once
 #include <string>
 
@@ -40,5 +37,3 @@ class Queue {
         bool isFull();
         int size();
 };
-
-#endif

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <string>
 #include "data_structures.h"
 
 // STACK
@@ -52,7 +52,6 @@ Queue::Queue() {
 
 void Queue::enqueue(std::string val) {
     if(isFull()) {
-        std::cout << "Queue is full." << std::endl;
         return;
     }
     if(isEmpty()) { // if queue is empty, just add value to head
@@ -73,7 +72,6 @@ void Queue::enqueue(std::string val) {
 
 void Queue::dequeue() { // if head not empty, make it empty and move head to next mem addr    
     if(isEmpty()) {
-        std::cout << "Queue is empty." << std::endl;
         return;
     }
     

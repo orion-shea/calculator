@@ -2,72 +2,30 @@
 #include "calculator.h"
 #include "data_structures.h"
 
-double addition(double a, double b) {
-    return a + b;
-}
-
-double subtraction(double a, double b) {
-    return a - b;
-}
-
-double multiplication(double a, double b) {
-    return a * b;
-}
-
-double division(double a, double b) {
-    return a / b;
-}
-
-double exponent(double a, double b) {
-    return pow(a, b);
-}
-
-double postfix(Queue q) {
-    std::string a, b;
-    double result = 0;
+double evaluatePostfix(Queue& q) {
     Stack s;
-    int index = q.size();
-    for(int i = 0; i < index; i++) {
-        if(q.peek() != "+" && q.peek() != "-" && q.peek() != "*" && q.peek() != "/" && q.peek() != "^") {
-            s.push(q.peek());
+    std::string str_a, str_b;
+    double operand1, operand2, result = 0;
+    std::string qTop;
+
+    while(!q.isEmpty()) {
+        qTop = q.peek();
+        if(qTop != "+" && qTop != "-" && qTop != "*" && qTop != "/" && qTop != "^") {
+            s.push(qTop);
             q.dequeue();
         }
         else {
-            if(q.peek() == "+") {
-                b = s.peek();
-                s.pop();
-                a = s.peek();
-                s.pop();
-                result = addition(std::stod(a), std::stod(b));
-            }
-            if(q.peek() == "-") {
-                b = s.peek();
-                s.pop();
-                a = s.peek();
-                s.pop();
-                result = subtraction(std::stod(a), std::stod(b));
-            }
-            if(q.peek() == "*") {
-                b = s.peek();
-                s.pop();
-                a = s.peek();
-                s.pop();
-                result = multiplication(std::stod(a), std::stod(b));
-            }
-            if(q.peek() == "/") {
-                b = s.peek();
-                s.pop();
-                a = s.peek();
-                s.pop();
-                result = division(std::stod(a), std::stod(b));
-            }
-            if(q.peek() == "^") {
-                b = s.peek();
-                s.pop();
-                a = s.peek();
-                s.pop();
-                result = exponent(std::stod(a), std::stod(b));
-            }
+            str_b = s.peek();
+            s.pop();
+            str_a = s.peek();
+            s.pop();
+            operand1 = std::stod(str_a);
+            operand2 = std::stod(str_b);
+            if(qTop == "+") {result = operand1 + operand2;}
+            else if(qTop == "-") {result = operand1 - operand2;}
+            else if(qTop == "*") {result = operand1 * operand2;}
+            else if(qTop == "/") {result = operand1 / operand2;}
+            else if(qTop == "^") {result = pow(operand1, operand2);}
             q.dequeue();
             s.push(std::to_string(result));
         }
@@ -76,10 +34,10 @@ double postfix(Queue q) {
 }
 
 int precedence(std::string val) {
-    if(val == "+" || val == "-") return 1;
-    if(val == "*" || val == "/") return 2;
-    if(val == "^") return 3;
-    if(val == "(" || val == ")") return 4;
+    if(val == "+" || val == "-") return 2;
+    if(val == "*" || val == "/") return 3;
+    if(val == "^") return 4;
+    if(val == "(" || val == ")") return 1;
     return 0;
 }
 
@@ -123,7 +81,60 @@ Doing that with std::stod. Also really cool. I should probably go this route for
 
 */
 
+void handleOperator(Stack &s, Queue &q, std::string& number, std::string valStr, std::string symbol)
+{
+    if (number != "") {
+        q.enqueue(number);
+        number = "";
+    }
+    if (s.isEmpty()) {
+        s.push(valStr);
+    }
+    else if(valStr == "^")
+    {
+        while (!s.isEmpty() && precedence(valStr) < precedence(s.peek()))
+        {
+            symbol = s.peek();
+            q.enqueue(symbol);
+            s.pop();
+        }
+        s.push(valStr);
+    }
+    else
+    {
+        while (!s.isEmpty() && precedence(valStr) <= precedence(s.peek()))
+        {
+            symbol = s.peek();
+            q.enqueue(symbol);
+            s.pop();
+        }
+        s.push(valStr);
+    }
+}
 
+bool isNegative(const std:: string& expression, int i) {
+    if
+    (
+        i == 0 ||
+        expression[i - 1] == '(' ||
+        expression[i - 1] == '*' ||
+        expression[i - 1] == '/' ||
+        expression[i - 1] == '^'
+    ) { return true; }
+    return false;
+    /*
+    Is operator if:
+        -follows a number -> 5 - 2
+        -follows an ending paren -> (2 + 2 ) - 3
+
+    Is negative if:
+        -follows nothing else -> -5
+        -follows open paren -> (-2 + 2)
+        -follows mult or divide -> 5*-2
+        2-3(2)
+
+    */
+}
 
 double pemdas(const std::string& expression) { //look more into const and passing by reference.
     Stack s;
@@ -138,6 +149,13 @@ double pemdas(const std::string& expression) { //look more into const and passin
         val = expression[i];
         valStr = std::string(1, val);
         switch(val) {
+            case '.':
+            case '0':
+            case '1': case '2': case '3':
+            case '4': case '5': case '6':
+            case '7': case '8': case '9':
+                number += val;
+                break;
             case '(':
                 s.push(valStr);
                 break;
@@ -153,31 +171,17 @@ double pemdas(const std::string& expression) { //look more into const and passin
                 }
                 s.pop();
                 break;
-            case '+':
             case '-':
-            case '*':
-            case '/': //the rest of these ops are left associative.
-            case '^': // exponent is right associative and shouldn't use <= for precedence, but <.
-                q.enqueue(number);
-                number = "";
-
-                if(s.isEmpty()) {
-                    s.push(valStr);
+                if(isNegative(expression, i)) {
+                    number += val;
                 }
-
-                else {
-                    while(precedence(valStr) <= precedence(s.peek())) {
-                        symbol = s.peek();
-                        q.enqueue(symbol);
-                        s.pop();
-                    }
-                    s.push(valStr);
-                }
+                else handleOperator(s, q, number, valStr, symbol);
                 break;
-            case ' ':
+            case '+': case '*': case '/': case '^': // exponent is right associative and shouldn't use <= for precedence, but <.
+                handleOperator(s, q, number, valStr, symbol);
                 break;
             default:
-                number += val;
+                break;
         }
     }
     if(number != "") {
@@ -188,11 +192,6 @@ double pemdas(const std::string& expression) { //look more into const and passin
         q.enqueue(symbol);
         s.pop();
     }
-    std::cout << " FINAL QUEUE:" << std::flush;
-    for(int i = 0; i < q.size(); i++) {
-        std::cout << " " << q.arr[i] << std::flush;
-    }
-    std::cout << std::endl;
-    double result = postfix(q);
+    double result = evaluatePostfix(q);
     return result;
 }

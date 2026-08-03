@@ -25,6 +25,10 @@ body {
   margin-right: 500px;
 }
 
+#btnAdd, #btnSubtract, #btnMultiply, #btnDivide {
+  background-color:rgb(255, 183, 0)
+}
+
 #btnEquals {
     background-color:rgb(226, 43, 43)
 }

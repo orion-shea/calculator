@@ -74,6 +74,7 @@ int main() {
 });
 
     // 3. Start the server on port 8080
+    std::cout << "Server is running..." << std::flush;
     svr.listen("0.0.0.0", 8080);
     return 0;
 }
