@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(100, 201, 232);
+    background-color: #223C63;
 }
 
 .calculator-display {
@@ -9,45 +9,135 @@ body {
     justify-content: center;
     margin-top: 50px;
     margin-bottom: 50px;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'IBM Plex Mono', monospace;  
     font-size: 40px;
-    background-color: rgb(236, 255, 126);
+    background-color: #2B3349;
     border: 1px solid black;
-    border-radius: 50px;
-    margin-left: 500px;
-    margin-right: 500px;
+    border-radius: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+
+    width: 650px;  /* Only take up space needed for content */
+
+    min-width: 150px;     /* Increased from 45px */
+    min-height: 100px;    /* Add height constraint */
+    
 }
 
 .calculator-buttons {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  margin-left: 500px;
-  margin-right: 500px;
+  grid-template-columns: repeat(4, auto);  /* Changed from 1fr to auto */
+  justify-items: center;  /* Center items in their cells */
+  gap: 10px;
+  margin: 0 auto;  /* Center the grid itself */
+  width: fit-content;  /* Only take up space needed for content */
+
+  
 }
 
-#btnEquals {
-    background-color:rgb(226, 43, 43)
+#btnBackspace {
+  font-size: 50px;
+}
+
+#btnAdd, #btnSubtract, #btnMultiply, #btnDivide {
+  background-color: #D47523;
+}
+
+#btnEquals, #btnC, #btnBackspace  {
+    background-color: #B83D02;
 }
 
 button {
-    height: 100px;
-    width: 100px;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 20px;
-    padding: 10px 20px;
-    margin: 5px;
+  font-family: 'IBM Plex Mono', monospace;  
+    color: rgb(231, 222, 222);
+    font-size: 30px;
+    padding: 15px 20px;  /* Increased from 8px 12px */
+    margin: 3px;
     border: 1px solid black;
-    border-radius: 50px;
-    background-color: #ffffff;
+    border-radius: 30px;
+    background-color: #2B3349;
     cursor: pointer;
+    min-width: 150px;     /* Increased from 45px */
+    min-height: 100px;    /* Add height constraint */
+    touch-action: manipulation;  /* Disable double-tap zoom on mobile */
 }
 
 button:hover {
-  background-color: #04fd00;
+  background-color: #375b91;
+  transition: all 0.2s ease
 
 }
 
 button:active {
   transform: translateY(5px);
+}
+
+
+/* Row 1: 7 8 9 + */
+#btn7 { grid-column: 1; grid-row: 1; }
+#btn8 { grid-column: 2; grid-row: 1; }
+#btn9 { grid-column: 3; grid-row: 1; }
+#btnAdd { grid-column: 4; grid-row: 1; }
+
+/* Row 2: 4 5 6 - */
+#btn4 { grid-column: 1; grid-row: 2; }
+#btn5 { grid-column: 2; grid-row: 2; }
+#btn6 { grid-column: 3; grid-row: 2; }
+#btnSubtract { grid-column: 4; grid-row: 2; }
+
+/* Row 3: 1 2 3 × */
+#btn1 { grid-column: 1; grid-row: 3; }
+#btn2 { grid-column: 2; grid-row: 3; }
+#btn3 { grid-column: 3; grid-row: 3; }
+#btnMultiply { grid-column: 4; grid-row: 3; }
+
+/* Row 4: 0 . = ÷ */
+#btn0 { grid-column: 1; grid-row: 4; }
+#btnDecimal { grid-column: 2; grid-row: 4; }
+#btnEquals { grid-column: 3; grid-row: 4; }
+#btnDivide { grid-column: 4; grid-row: 4; }
+
+/* Row 5: BACK C ? (parentheses, etc.) */
+#btnP1 { grid-column: 1; grid-row: 5; }
+#btnP2 { grid-column: 2; grid-row: 5; }
+#btnBackspace { grid-column: 3; grid-row: 5; }
+#btnC { grid-column: 4; grid-row: 5; }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .calculator-display {
+    width: 90vw;
+    max-width: 320px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 28px;
+    min-height: 70px;
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  .calculator-buttons {
+    width: 90vw;
+    max-width: 320px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 10px 12px;
+    min-width: 60px;
+    min-height: 60px;
+    border-radius: 8px;  /* Changed from 30px to 8px - rounded rectangle, not circle */
+  }
+
+  #btnBackspace {
+    font-size: 24px;
+  }
 }
 

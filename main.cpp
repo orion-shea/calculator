@@ -2,10 +2,9 @@
 #include "httplib.h" // header that lets me make a server. I downloaded it from GH
 #include <fstream>
 #include <sstream>
-#include "stack.h" //header with my stack code
+#include "data_structures.h" //header with my stack code
 #include "calculator.h" // takes care of the math stuff
 
-//idk
 std::string read_file(const std::string& path) {
     std::ifstream file(path);
     if (!file) return "";
@@ -14,15 +13,11 @@ std::string read_file(const std::string& path) {
     return ss.str();
 }
 
-//idk how this works.
 std::string trim_zeros(double num) {
     std::string str = std::to_string(num);
     
     // Remove trailing zeros
     str.erase(str.find_last_not_of('0') + 1, std::string::npos);
-
-
-
     
     // Remove trailing decimal point if no fractional part remains
     str.erase(str.find_last_not_of('.') + 1, std::string::npos);
@@ -67,13 +62,14 @@ int main() {
 
     svr.Get("/calculate", [](const httplib::Request& req, httplib::Response& res) {
         std::string expression = req.get_param_value("expression");
-        double result = eval(expression);
+        double result = pemdas(expression);
         std::string r = trim_zeros(result);
 
         res.set_content(r, "text/plain");
 });
 
     // 3. Start the server on port 8080
+    std::cout << "Server is running..." << std::flush;
     svr.listen("0.0.0.0", 8080);
     return 0;
 }

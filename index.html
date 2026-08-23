@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"> <!-- Server was having issues b/c I did not declare encoding-->
     <title>🤓 Calculator App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"> <!-- Server was having issues b/c I did not declare encoding-->
     <link rel="stylesheet" href="style.css"> <!--Link to the stylesheet in <head>-->
     <script src="script.js" defer></script> <!--Link to the script in <head>-->
     <!-- The defer keyword makes sure the script is executed after the HTML is parsed -->
@@ -21,17 +22,17 @@
         <button value="7" id="btn7">7</button>
         <button value="8" id="btn8">8</button>
         <button value="9" id="btn9">9</button>
-        <button value="." id="btn.">.</button>
-        <button value="(" id="btn(">(</button>
-        <button value=")" id="btn)">)</button>
-        <button value="^" id="btn^">^</button>
-        <button value="+" id="btn+">+</button>
-        <button value="-" id="btn-">-</button>
-        <button value="×" id="btn*">×</button>
-        <button value="÷" id="btn/">÷</button>
+        <button value="." id="btnDecimal">.</button>
+        <button value="(" id="btnP1">(</button>
+        <button value=")" id="btnP2">)</button>
+        <button value="+" id="btnAdd">+</button>
+        <button value="-" id="btnSubtract">-</button>
+        <button value="×" id="btnMultiply">×</button>
+        <button value="÷" id="btnDivide">÷</button>
         <button value="=" id="btnEquals">=</button>
-        <button value="Backspace" id="btnBackspace">BACK</button>
+        <button value="Backspace" id="btnBackspace">⌫</button>
         <button value="C" id="btnC">C</button>
+
     </div>
 </body>
 </html>

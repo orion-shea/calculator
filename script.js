@@ -1,270 +1,223 @@
-/*
-    Notes:
-    Instead of 1 central function, I should split up into different tasks.
-    Also wanting to fix variable names. How do I do that efficiently?
+const expression = {
+    current: '0',
+    operatorCount: 0,
+    balance: 0,
+    initialZero: true,
+    decimalUsed: false,
+};
 
-    For next time..
-    I want to add negative functionality
-    I want to finally start figuring out the API and backend.
-*/
+document.querySelector('.calculator-buttons').addEventListener('click', main);
+document.addEventListener('keydown', main);
+document.getElementById('display').innerHTML =  '0'; 
 
-//clicks only listen when they're inside the calculator-buttons div.
-document.querySelector('.calculator-buttons').addEventListener('click', f);
-document.addEventListener('keydown', f);
-
-//as opposed to just listening for clicks on the whole entire page.
-//document.addEventListener('click', f);
-
-/*
-    document.querySelector('.calculator-buttons').addEventListener('keydown', f);
-
-    interesting - will only allow keydowns after a click on calculator-buttons div.
-    this seems to be what google does, since they have calculator and other
-    things on the same page. cool!
-*/
-
-let expression = '0'; // Make it a string to hold both nums and symbols.
-// Immediately show 0 on the display (and at all times when the display is empty).
-document.getElementById('display').innerHTML =  expression; 
-
-let initialZero = true; // for parenthesis stuff - lets me type 0 at the start and
-// then follow it with a paren to keep 0(a + b), etc. that's if I touch the
-// 0. If untouched, which will be default, the paren will simply replace 0.
-let decimalUsed = false; // flag for decimal point.
-let unclosedParen = [false]; // flag for parenthesis.
-
-
-
-async function f(event) {    
-    // tracks current value of button pressed (or key pressed).
-    let buttonValue = ''; 
-    //an array storing booleans. if all true, input can be garbage free.
-    //this can help me avoid invalid expressions, like two operators in a row, etc.
-    let garbageFree = [expression[expression.length - 1] != ' ',
-                        expression[expression.length - 1] != '.',
-                        expression[expression.length - 1] != '(',
-                        expression[expression.length - 1] != '^'];
-
-    
-
-    // normalize both inputs (click and keydown)
-    if(event.type === 'click') { 
+function normalize(event, buttonValue) {
+    if (event.type === 'click') {
         buttonValue = event.target.value;
     }
-    if(event.type === 'keydown') {
+    if (event.type === 'keydown') {
         if (event.key === 'Enter') {
             event.preventDefault(); //weird bug with enter, i stop it w this
         }
         buttonValue = event.key;
     }
-
-    // normalize these inputs
-    if(buttonValue === '*') {
+    if (buttonValue === '*') {
         buttonValue = '×';
     }
-    if(buttonValue === '/') {
+    if (buttonValue === '/') {
         buttonValue = '÷';
     }
+    return buttonValue;
+}
 
+function permitInsertion(expression) {
+    let lastInput = expression.current[expression.current.length - 1]
+    if(lastInput === ' ') return false;
+    else if(lastInput === '.' ) return false;
+    else if(lastInput === '(') return false;
+    else if(lastInput === '-') return false;
+    return true;
+}
 
+function permitEvaluation(expression) {
+    if(expression.operatorCount === 0) return false;
+    if(expression.balance != 0) return false;
+    return true;
+}
 
-    // switch statement taking care of logic for each button/key pressed.
-    switch(buttonValue) {
+function handleNumber(expression, buttonValue) {
+    // if display is just 0, always replace with the new number.
+    if(expression.current === '0') {
+        expression.current = buttonValue;
+    }
+    else if(expression.current[expression.current.length - 1] === '0' && 
+        (expression.current[expression.current.length - 2] === ' ' || expression.current[expression.current.length - 2] === '-')) {
+        expression.current = expression.current.slice(0, -1) + buttonValue;
+    }
+    else {
+        expression.current += buttonValue;
+    }
+}
+
+function handleOperator(expression, buttonValue) {
+    // trying to be fancy like google and replace operators w/ each other
+    if(expression.current[expression.current.length - 1] === ' ') {
+        if(buttonValue === '-' && 
+            (expression.current[expression.current.length - 2] == '×' || 
+            expression.current[expression.current.length - 2] == '÷')
+        ) {
+            expression.current += buttonValue;
+            expression.operatorCount++;
+        }
+        else {
+            expression.current =  expression.current.slice(0, -2) + buttonValue + ' ';
+            expression.operatorCount++;
+        }
+    }
+    // only execute if there isn't garbage right before this input.
+    else if(permitInsertion(expression)) {
+        //adding space buffer for visual improvement
+        expression.current += ' ' + buttonValue + ' ';
+        expression.operatorCount++;
+        expression.decimalUsed = false; // reset decimal point flag after an operator.
+    }
+}
+
+function handleParenthesis(expression, buttonValue) {
+    let lastInput = expression.current[expression.current.length - 1];
+    if (buttonValue === '(' && lastInput != '.') {
+        if (expression.initialZero === true) {
+            expression.current = buttonValue; //if display is the initial 0, just replace it.
+            expression.initialZero = false;
+        }
+        else expression.current += buttonValue; //otherwise, add the parenthesis onto the displayed expression
+        expression.balance++; //increment our balance counter by 1 to track an open paren.
+        expression.decimalUsed = false; // reset decimal point flag after an open paren.
+    }
+    else {
+        if (permitInsertion(expression)) {//only execute if there isn't garb right b4
+            //if there is still an opening paren that hasn't been closed, go:
+            if (expression.balance > 0) {
+                expression.current += buttonValue;
+                expression.balance--; //decrement counter to indicate closed/balanced parentheses.
+                expression.decimalUsed = false; // reset decimal point flag after a close paren.
+            }
+        }
+    }
+}
+
+function handleBackspace(expression, buttonValue) {
+    let lastInput = expression.current[expression.current.length - 1];
+
+    //backspace with just 1 digit left should reset to 0, not empty string.
+    if (expression.current.length === 1) {
+        expression.initialZero = true;
+        expression.decimalUsed = false;
+        expression.balance = 0;
+        expression.current = '0';
+        return;
+    }
+    else if (lastInput === ' ') {
+        //document.getElementById('display').innerHTML = accumulator.slice(0, -3);
+        expression.current = expression.current.slice(0, -3);
+        expression.operatorCount--;
+        return;
+    }
+    else if (lastInput === '.') { expression.decimalUsed = false; }
+    else if (lastInput === '(') { expression.balance--; }
+    else if (lastInput === ')') { expression.balance++; }
+    expression.current = expression.current.slice(0, -1);
+}
+
+async function api(expression) {
+    try {
+        const response = await fetch(`/calculate?expression=${encodeURIComponent(expression)}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.text(); // or .json() if server returns JSON
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.error('Fetch failed:', error);
+        throw error; // optional: let the caller handle it
+    }
+}
+
+async function main(event) {
+    let buttonValue = '';
+    buttonValue = normalize(event, buttonValue); // tracks current value of normalized button
+    if(expression.current === 'inf' ||expression.current === 'nan') { buttonValue = 'C'; }
+    switch(buttonValue) { // logic for each button.
         case '0':
-            // if i manually type 0 at the start, it means i touched
-            if(initialZero) { 
-                initialZero = false;
-            }
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            // if display is just 0, always replace with the new number.
-            if(expression === '0') {
-                expression = buttonValue;
-            }
-            //otherwise, add that number onto the expression.
-            else {
-                expression += buttonValue;
-            }
-            break;
-        case '+':
-        case '-':
-            //clever way to handle negatives
-        case '×':
-        case '÷':
-            // trying to be fancy like google and replace operators w/ each other
-            if(!garbageFree[0]) {
-                // accumulator = itself - 2 characters, then add val and a space.
-                expression =  expression.slice(0, -2) + buttonValue + ' ';
-            }
-            // only execute if there isn't garbage right before this input.
-            else if(garbageFree.every(Boolean)) {
-                //adding space buffer for visual improvement
-                expression += ' ' + buttonValue + ' ';
-                decimalUsed = false; // reset decimal point flag after an operator.
-            }
+        case '1': case '2': case '3':
+        case '4': case '5': case '6':
+        case '7': case '8': case '9':
+            expression.initialZero = false;
+            handleNumber(expression, buttonValue);
             break;
         case '.':
-            // only let me decimal if there isn't garbo right b4
-            if(garbageFree.every(Boolean)) {
-                if(decimalUsed === false) { 
-                    expression += buttonValue;
-                }    
-            decimalUsed = true; // flag to indicate that a decimal point has been added.
+            if(expression.decimalUsed === false && permitInsertion(expression)) {
+                expression.decimalUsed = true;
+                expression.current += buttonValue;
             }
-            
             break;
-        case '(':
-            if(expression === '0' && initialZero === true) {
-                expression = buttonValue; //if is the initial 0, just replace it.
+        case '+': case '×': case '÷':
+            handleOperator(expression, buttonValue);
+            break;
+        case '-':
+            if(expression.current === '0') {
+                expression.current = buttonValue;
+                expression.initialZero = false;
+            }
+            else if(expression.current[expression.current.length - 1] === '(') {
+                expression.current += buttonValue;
             }
             else {
-                expression += buttonValue; //otherwise, add paren onto the displayed expr.
-            }
-            // paren flag magic
-            if(!unclosedParen[0]) { 
-                //if the first val of paren is false, this means that no parens
-                //have been opened yet. so change it to true to indicate first open
-                unclosedParen = [true];
-            }
-            else {
-                //otherwise, this means that a paren is already open and hasn't
-                //been closed yet. so, just add another open one to the list.
-                unclosedParen.push(true);
-            } 
-            /* 
-            Google also adds the ending parenthesis (greyed out) automatically.
-            Can do something like add both paren, but ending paren is at 
-            i + 1, and we continue adding characters at position i until
-            we input ending paren, closing the parens.
-            */
-            decimalUsed = false; // reset decimal point flag after an open paren.
-            break;
-        case ')':
-            // same as operators, only execute if there isn't garb right b4
-            if(garbageFree.every(Boolean)) {
-                //if there is still an opening paren that hasn't been closed, go:
-                if(unclosedParen[0] === true) {
-                    unclosedParen.pop(); //pop the last true to close 1 opening paren.  
-                    expression += buttonValue;
-                    decimalUsed = false; // reset decimal point flag after a close paren.
-                }
-                // if we just popped the last true and the list is empty, reset
-                // this means all opening parens have been closed.
-                if(unclosedParen.length === 0) {
-                    unclosedParen = [false];
-                }
+                handleOperator(expression, buttonValue);
             }
             break;
-
-
-        case '^':
-            if(garbageFree.every(Boolean)) {
-                expression += buttonValue;
-            }
+        case '(': case ')':
+            handleParenthesis(expression, buttonValue);
             break;
-
-
         case 'Backspace':
-            //backspace with just 1 digit left should reset to 0, not empty string.
-            if(expression.length === 1) {
-                expression = '0';
-                decimalUsed = false; // reset decimal point flag after clearing.
-                unclosedParen.length = 0;
-                unclosedParen = [false]; // reset parenthesis flag after clearing.
-                initialZero = true; // reset this flag too.
-            }
-            else if(expression[expression.length - 1] === ' ') {
-                //document.getElementById('display').innerHTML = accumulator.slice(0, -3);
-                expression = expression.slice(0, -3);
-            }
-            //Dot Logic
-            else if(expression[expression.length - 1] === '.') {
-                decimalUsed = false;
-                expression = expression.slice(0, -1);
-            }
-
-            //Parenthesis logic
-            else if(expression[expression.length - 1] === '(') {
-                if(unclosedParen.length === 1) {
-                    unclosedParen = [false];
-                }
-                else { 
-                    unclosedParen.pop();
-                }
-                expression = expression.slice(0, -1);
-            }
-            else if(expression[expression.length - 1] === ')') {
-                if(!unclosedParen[0]) {
-                    unclosedParen = [true];
-                }
-                else {
-                    unclosedParen.push(true);
-                }
-                expression = expression.slice(0, -1);
-            }
-
-
-            //otherwise, cut off the last character of the accumulator string.
-            else {
-                expression = expression.slice(0, -1);
-            }
+            handleBackspace(expression, buttonValue);
             break;
-        case 'c':
-        case 'C':
-            expression = '0';
-            decimalUsed = false; // reset decimal point flag after clearing.
-            unclosedParen.length = 0;
-            unclosedParen = [false]; // reset parenthesis flag after clearing.
-            initialZero = true; //reset this too
+        case 'C': case 'c':
+            expression.current = '0';
+            expression.initialZero = true;
+            expression.decimalUsed = false;
+            expression.balance = 0;
+            expression.operatorCount = 0;
             break;
-        case '=':
-        case 'Enter':
-            //run only if valid end to expression
-            if(garbageFree.every(Boolean)) {
-                //normalize everything into ascii
-                if (expression.includes('×') || expression.includes('÷')) {
-                    //ONLY REPLACES THE FIRST MULT OR DIV. FIX LATER
-                    expression = expression.replace('×', '*').replace('÷', '/');
-                }
-                /* Great way to normalize the expression here.
-                let payload = expression
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/')
-                    .replace(/\s+/g, '');
-                */
-                expression = await evaluate(expression);
-                decimalUsed = false; // reset decimal point flag after evaluation.
-                unclosedParen.length = 0;
-                unclosedParen = [false]; // reset parenthesis flag after evaluation.
-                // idk if this is needed -> initialZero = true; //reset it too
+        case '=': case 'Enter':
+            //run only if valid expression
+            // Count implicit multiplications (these all represent hidden operators)
+            if(expression.current.includes(')(')) expression.operatorCount++;   // (2)(3)
+            if(/\d\(/.test(expression.current)) expression.operatorCount++;    // 2(3)
+            if(/\)\d/.test(expression.current)) expression.operatorCount++;    // (2)3
+            if (permitEvaluation(expression)) {
+                let payload = expression.current
+                .replaceAll('×', '*')
+                .replaceAll('÷', '/')
+                .replaceAll('-(', '(-1)*(')
+                .replaceAll('(-', '(-1*')
+                .replaceAll(')(', ')*(')
+                .replace(/(\d)\(/g, '$1*(') //RegEx for n(... ---> n*(... (for all numbers 0-9).
+                .replace(/\)(\d)/g, ')*$1') //RegEx for ...)n ---> ...)*n (for all numbers 0-9).
+                // normalize everything for c++ input
+                
+                payload = payload.replaceAll(' ', '');
+                expression.current = await api(payload);
+                expression.operatorCount = 0;  // Reset for next calculation
+                expression.balance = 0;         // Reset for next calculation
+                if(expression.current.includes('.')) expression.decimalUsed = true; // reset decimal point flag after evaluation.
+                else expression.decimalUsed = false;
+                if(expression.current === '0') expression.initialZero = true;
             }
             break;
         default:
     }
-    document.getElementById('display').innerHTML =  expression;
-}
-
-
-async function evaluate(expression) {
-  try {
-    const response = await fetch(`/calculate?expression=${encodeURIComponent(expression)}`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const result = await response.text(); // or .json() if server returns JSON
-    console.log(result);
-    return result;
-  } catch (error) {
-    console.error('Fetch failed:', error);
-    throw error; // optional: let the caller handle it
-  }
+    document.getElementById('display').innerHTML =  expression.current;
 }
