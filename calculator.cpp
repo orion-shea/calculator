@@ -10,7 +10,7 @@ double evaluatePostfix(Queue& q) {
 
     while(!q.isEmpty()) {
         qTop = q.peek();
-        if(qTop != "+" && qTop != "-" && qTop != "*" && qTop != "/" && qTop != "^") {
+        if(qTop != "+" && qTop != "-" && qTop != "*" && qTop != "/") {
             s.push(qTop);
             q.dequeue();
         }
@@ -25,7 +25,6 @@ double evaluatePostfix(Queue& q) {
             else if(qTop == "-") {result = operand1 - operand2;}
             else if(qTop == "*") {result = operand1 * operand2;}
             else if(qTop == "/") {result = operand1 / operand2;}
-            else if(qTop == "^") {result = pow(operand1, operand2);}
             q.dequeue();
             s.push(std::to_string(result));
         }
@@ -34,52 +33,11 @@ double evaluatePostfix(Queue& q) {
 }
 
 int precedence(std::string val) {
+    if(val == "(" || val == ")") return 1;
     if(val == "+" || val == "-") return 2;
     if(val == "*" || val == "/") return 3;
-    if(val == "^") return 4;
-    if(val == "(" || val == ")") return 1;
     return 0;
 }
-
-/* Better than what I've written above - It's much more readable.
-enum Precedence {
-    NONE = 0,
-    SUM = 1,        // + and -
-    PRODUCT = 2,    // * and /
-    EXPONENT = 3    // ^
-};
-*/
-
-// CREATE TOKENIZE FUNCTION! Also think about using a struct/class for this.
-// This will separate tokenization from parsing and doing my shunting yard algorithm. Industry standard.
-// Splitting up a program into multiple functions like this avoids "tight coupling".
-
-/*
-
-Incredible. Instead of having a queue of heavy strings, with complex destructors, big size, etc.
-I can use this industry standard:
-Method: The Variant / Polymorphic Token (The True Industry Standard)
-
-I felt I had to resort to string because I was putting both digits and chars into my queue. I didn't know another
-way to put something like 233.5 into the same list as + without just turning everything into strings and going off
-that. It's still fine for a small application, I'm sure, but this method is so elite:
-
-enum TokenType { OPERATOR, NUMBER };
-
-struct Token {
-    TokenType type;
-    char op;         // Used if type == OPERATOR (e.g., '+', '*')
-    double value;    // Used if type == NUMBER   (e.g., 5.2, 233.0)
-};
-*/
-
-/*
-Method B: Delimited Single Character Array (The Lightweight Hack)
-This also works - instead of strings - ['5', '.', '2', ' ', '2', ' ', '+'] do this. 
-Then, when I hit a space, glue the characters together into a string to then convert into a double.
-Doing that with std::stod. Also really cool. I should probably go this route for learning.
-
-*/
 
 void handleOperator(Stack &s, Queue &q, std::string& number, std::string valStr, std::string symbol)
 {
@@ -88,16 +46,6 @@ void handleOperator(Stack &s, Queue &q, std::string& number, std::string valStr,
         number = "";
     }
     if (s.isEmpty()) {
-        s.push(valStr);
-    }
-    else if(valStr == "^")
-    {
-        while (!s.isEmpty() && precedence(valStr) < precedence(s.peek()))
-        {
-            symbol = s.peek();
-            q.enqueue(symbol);
-            s.pop();
-        }
         s.push(valStr);
     }
     else
@@ -118,8 +66,7 @@ bool isNegative(const std:: string& expression, int i) {
         i == 0 ||
         expression[i - 1] == '(' ||
         expression[i - 1] == '*' ||
-        expression[i - 1] == '/' ||
-        expression[i - 1] == '^'
+        expression[i - 1] == '/'
     ) { return true; }
     return false;
     /*
@@ -136,7 +83,7 @@ bool isNegative(const std:: string& expression, int i) {
     */
 }
 
-double pemdas(const std::string& expression) { //look more into const and passing by reference.
+double pemdas(const std::string& expression) {
     Stack s;
     Queue q;
 
@@ -177,7 +124,7 @@ double pemdas(const std::string& expression) { //look more into const and passin
                 }
                 else handleOperator(s, q, number, valStr, symbol);
                 break;
-            case '+': case '*': case '/': case '^': // exponent is right associative and shouldn't use <= for precedence, but <.
+            case '+': case '*': case '/':
                 handleOperator(s, q, number, valStr, symbol);
                 break;
             default:

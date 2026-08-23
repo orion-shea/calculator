@@ -1,25 +1,14 @@
-//
-// Javascript
-//
+const expression = {
+    current: '0',
+    operatorCount: 0,
+    balance: 0,
+    initialZero: true,
+    decimalUsed: false,
+};
 
 document.querySelector('.calculator-buttons').addEventListener('click', main);
 document.addEventListener('keydown', main);
 document.getElementById('display').innerHTML =  '0'; 
-
-/* REFACTOR LATER WITH THIS
-const expression = {
-    current: '0',
-    balance = 0,
-    initialZero: true,
-    decimalUsed: false
-};
-*/
-
-// GLOBAL VARIABLES - REPLACE WITH DICTIONARY ABOVE
-let expression = '0';
-let initialZero = true; // keep track of used/unused 0 at start.
-let decimalUsed = false; // flag for decimal point.
-let balance = 0; // Counter to track balanced parentheses.
 
 function normalize(event, buttonValue) {
     if (event.type === 'click') {
@@ -41,126 +30,102 @@ function normalize(event, buttonValue) {
 }
 
 function permitInsertion(expression) {
-    let lastInput = expression[expression.length - 1]
+    let lastInput = expression.current[expression.current.length - 1]
     if(lastInput === ' ') return false;
     else if(lastInput === '.' ) return false;
     else if(lastInput === '(') return false;
-    else if(lastInput === '^') return false;
     else if(lastInput === '-') return false;
     return true;
 }
 
-function permitEvaluation(expression, balance) {
-    //If expression has an operator, 
-    if
-    (
-    permitInsertion(expression) && 
-    (expression.includes('+') || 
-    expression.includes('-') || 
-    expression.includes('×') || 
-    expression.includes('÷') ||
-    expression.includes('^') ||
-    expression.includes('(')
-    ) &&
-    balance === 0
-    ) {
-        return true;
-    }
-    return false;
+function permitEvaluation(expression) {
+    if(expression.operatorCount === 0) return false;
+    if(expression.balance != 0) return false;
+    return true;
 }
 
 function handleNumber(expression, buttonValue) {
     // if display is just 0, always replace with the new number.
-    if(expression === '0') {
-        return buttonValue;
+    if(expression.current === '0') {
+        expression.current = buttonValue;
     }
-    else if(expression[expression.length - 1] === '0' && 
-        (expression[expression.length - 2] === ' ' || expression[expression.length - 2] === '-')) {
-        return expression.slice(0, -1) + buttonValue;
+    else if(expression.current[expression.current.length - 1] === '0' && 
+        (expression.current[expression.current.length - 2] === ' ' || expression.current[expression.current.length - 2] === '-')) {
+        expression.current = expression.current.slice(0, -1) + buttonValue;
     }
-    return expression + buttonValue;
+    else {
+        expression.current += buttonValue;
+    }
 }
 
 function handleOperator(expression, buttonValue) {
     // trying to be fancy like google and replace operators w/ each other
-    if(expression[expression.length - 1] === ' ') {
+    if(expression.current[expression.current.length - 1] === ' ') {
         if(buttonValue === '-' && 
-            (expression[expression.length - 2] == '×' || 
-            expression[expression.length - 2] == '÷' ||
-            expression[expression.length - 2] == '^')
+            (expression.current[expression.current.length - 2] == '×' || 
+            expression.current[expression.current.length - 2] == '÷')
         ) {
-            expression += buttonValue;
+            expression.current += buttonValue;
+            expression.operatorCount++;
         }
         else {
-            expression =  expression.slice(0, -2) + buttonValue + ' ';
+            expression.current =  expression.current.slice(0, -2) + buttonValue + ' ';
+            expression.operatorCount++;
         }
     }
     // only execute if there isn't garbage right before this input.
     else if(permitInsertion(expression)) {
         //adding space buffer for visual improvement
-        expression += ' ' + buttonValue + ' ';
-        decimalUsed = false; // reset decimal point flag after an operator.
+        expression.current += ' ' + buttonValue + ' ';
+        expression.operatorCount++;
+        expression.decimalUsed = false; // reset decimal point flag after an operator.
     }
-    return expression;
 }
 
 function handleParenthesis(expression, buttonValue) {
-    let lastInput = expression[expression.length - 1];
+    let lastInput = expression.current[expression.current.length - 1];
     if (buttonValue === '(' && lastInput != '.') {
-        if (initialZero === true) {
-            expression = buttonValue; //if display is the initial 0, just replace it.
-            initialZero = false;
+        if (expression.initialZero === true) {
+            expression.current = buttonValue; //if display is the initial 0, just replace it.
+            expression.initialZero = false;
         }
-        else expression += buttonValue; //otherwise, add the parenthesis onto the displayed expression
-        balance++; //increment our balance counter by 1 to track an open paren.
-        decimalUsed = false; // reset decimal point flag after an open paren.
+        else expression.current += buttonValue; //otherwise, add the parenthesis onto the displayed expression
+        expression.balance++; //increment our balance counter by 1 to track an open paren.
+        expression.decimalUsed = false; // reset decimal point flag after an open paren.
     }
     else {
         if (permitInsertion(expression)) {//only execute if there isn't garb right b4
             //if there is still an opening paren that hasn't been closed, go:
-            if (balance > 0) {
-                expression += buttonValue;
-                balance--; //decrement counter to indicate closed/balanced parentheses.
-                decimalUsed = false; // reset decimal point flag after a close paren.
+            if (expression.balance > 0) {
+                expression.current += buttonValue;
+                expression.balance--; //decrement counter to indicate closed/balanced parentheses.
+                expression.decimalUsed = false; // reset decimal point flag after a close paren.
             }
         }
     }
-    return expression;
 }
 
 function handleBackspace(expression, buttonValue) {
-    let lastInput = expression[expression.length - 1];
+    let lastInput = expression.current[expression.current.length - 1];
 
     //backspace with just 1 digit left should reset to 0, not empty string.
-    if (expression.length === 1) {
-        initialZero = true;
-        decimalUsed = false;
-        balance = 0;
-        return '0';
+    if (expression.current.length === 1) {
+        expression.initialZero = true;
+        expression.decimalUsed = false;
+        expression.balance = 0;
+        expression.current = '0';
+        return;
     }
     else if (lastInput === ' ') {
         //document.getElementById('display').innerHTML = accumulator.slice(0, -3);
-        return expression.slice(0, -3);
+        expression.current = expression.current.slice(0, -3);
+        expression.operatorCount--;
+        return;
     }
-    else if (lastInput === '.') { decimalUsed = false; }
-    else if (lastInput === '(') { balance--; }
-    else if (lastInput === ')') { balance++; }
-    return expression.slice(0, -1);
-}
-
-function getRandomRgb() {
-    /*
-        Cool bit shifts.
-        let num = Math.round(0xffffff * Math.random());
-        let r = num >> 16;
-        let g = num >> 8 & 255;
-        let b = num & 255;
-        return 'rgb(' + r + ', ' + g + ', ' + b + ')';
-    */
-    let r = Math.floor(Math.random() * 256);
-    let g = Math.floor(Math.random() * 256);
-    let b = Math.floor(Math.random() * 256);
-    return `rgb(${r}, ${g}, ${b})`; // Using a template literal 
+    else if (lastInput === '.') { expression.decimalUsed = false; }
+    else if (lastInput === '(') { expression.balance--; }
+    else if (lastInput === ')') { expression.balance++; }
+    expression.current = expression.current.slice(0, -1);
 }
 
 async function api(expression) {
@@ -183,56 +148,57 @@ async function api(expression) {
 async function main(event) {
     let buttonValue = '';
     buttonValue = normalize(event, buttonValue); // tracks current value of normalized button
-    if(expression === 'inf' ||expression === 'nan') { buttonValue = 'C'; }
+    if(expression.current === 'inf' ||expression.current === 'nan') { buttonValue = 'C'; }
     switch(buttonValue) { // logic for each button.
         case '0':
         case '1': case '2': case '3':
         case '4': case '5': case '6':
         case '7': case '8': case '9':
-            initialZero = false;
-            expression = handleNumber(expression, buttonValue);
+            expression.initialZero = false;
+            handleNumber(expression, buttonValue);
             break;
         case '.':
-            if(decimalUsed === false && permitInsertion(expression)) {
-                decimalUsed = true;
-                expression += buttonValue;
+            if(expression.decimalUsed === false && permitInsertion(expression)) {
+                expression.decimalUsed = true;
+                expression.current += buttonValue;
             }
             break;
-        case '+': case '×': case '÷': case '^':
-            expression = handleOperator(expression, buttonValue);
+        case '+': case '×': case '÷':
+            handleOperator(expression, buttonValue);
             break;
         case '-':
-            if(expression === '0') {
-                expression = buttonValue;
-                initialZero = false;
+            if(expression.current === '0') {
+                expression.current = buttonValue;
+                expression.initialZero = false;
             }
-            else if(expression[expression.length - 1] === '(') {
-                expression += buttonValue;
+            else if(expression.current[expression.current.length - 1] === '(') {
+                expression.current += buttonValue;
             }
             else {
-                expression = handleOperator(expression, buttonValue);
+                handleOperator(expression, buttonValue);
             }
             break;
         case '(': case ')':
-            expression = handleParenthesis(expression, buttonValue);
+            handleParenthesis(expression, buttonValue);
             break;
         case 'Backspace':
-            expression = handleBackspace(expression, buttonValue);
+            handleBackspace(expression, buttonValue);
             break;
         case 'C': case 'c':
-            expression = '0';
-            initialZero = true;
-            decimalUsed = false;
-            balance = 0;
-            break;
-        case '?':
-            document.body.style.backgroundColor =  getRandomRgb();
-            document.getElementById('display').style.backgroundColor = getRandomRgb();
+            expression.current = '0';
+            expression.initialZero = true;
+            expression.decimalUsed = false;
+            expression.balance = 0;
+            expression.operatorCount = 0;
             break;
         case '=': case 'Enter':
             //run only if valid expression
-            if (permitEvaluation(expression, balance)) {
-                let payload = expression
+            // Count implicit multiplications (these all represent hidden operators)
+            if(expression.current.includes(')(')) expression.operatorCount++;   // (2)(3)
+            if(/\d\(/.test(expression.current)) expression.operatorCount++;    // 2(3)
+            if(/\)\d/.test(expression.current)) expression.operatorCount++;    // (2)3
+            if (permitEvaluation(expression)) {
+                let payload = expression.current
                 .replaceAll('×', '*')
                 .replaceAll('÷', '/')
                 .replaceAll('-(', '(-1)*(')
@@ -241,14 +207,17 @@ async function main(event) {
                 .replace(/(\d)\(/g, '$1*(') //RegEx for n(... ---> n*(... (for all numbers 0-9).
                 .replace(/\)(\d)/g, ')*$1') //RegEx for ...)n ---> ...)*n (for all numbers 0-9).
                 // normalize everything for c++ input
-                payload = payload.replaceAll(' ', '')
-                expression = await api(payload);
-                if(expression.includes('.')) decimalUsed = true; // reset decimal point flag after evaluation.
-                else decimalUsed = false;
-                if(expression === '0') initialZero = true;
+                
+                payload = payload.replaceAll(' ', '');
+                expression.current = await api(payload);
+                expression.operatorCount = 0;  // Reset for next calculation
+                expression.balance = 0;         // Reset for next calculation
+                if(expression.current.includes('.')) expression.decimalUsed = true; // reset decimal point flag after evaluation.
+                else expression.decimalUsed = false;
+                if(expression.current === '0') expression.initialZero = true;
             }
             break;
         default:
     }
-    document.getElementById('display').innerHTML =  expression;
+    document.getElementById('display').innerHTML =  expression.current;
 }
