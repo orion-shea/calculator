@@ -2,7 +2,7 @@
 
 A full-stack, web-based mathematical calculator powered by a custom **C++ REST API engine**. Instead of relying on client-side evaluation, expression strings are sanitized in JavaScript and evaluated on a custom C++ backend using Dijkstra's **Shunting-Yard Algorithm** backed by custom **Stack** and **Circular Queue** data structure implementations.
 
-![Calculator Preview](assets/preview.png)
+<img width="789" height="806" alt="Screenshot 2026-08-24 at 17 06 32" src="https://github.com/user-attachments/assets/f7cbbaff-826a-4283-a470-d1eed919cb16" />
 
 ---
 
