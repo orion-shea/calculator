@@ -1,10 +1,14 @@
 #include <iostream>
-#include "httplib.h" // header that lets me make a server. I downloaded it from GH
 #include <fstream>
 #include <sstream>
-#include "data_structures.h" //header with my stack code
-#include "calculator.h" // takes care of the math stuff
+#include "httplib.h"       // Single-header HTTP server library (yhirose/cpp-httplib)
+#include "data_structures.h"
+#include "calculator.h"
 
+/**
+ * Helper utility: Reads static asset files from disk into raw string buffers.
+ * Returns empty string if file handle fails to open.
+ */
 std::string read_file(const std::string& path) {
     std::ifstream file(path);
     if (!file) return "";
@@ -13,23 +17,31 @@ std::string read_file(const std::string& path) {
     return ss.str();
 }
 
+/**
+ * Helper utility: Sanitizes C++ std::to_string() double output.
+ * Strips trailing zeros and redundant decimal points (e.g., "12.500000" -> "12.5", "5.000000" -> "5").
+ */
 std::string trim_zeros(double num) {
     std::string str = std::to_string(num);
     
-    // Remove trailing zeros
+    // Erase trailing zeros after decimal point
     str.erase(str.find_last_not_of('0') + 1, std::string::npos);
     
-    // Remove trailing decimal point if no fractional part remains
+    // Erase trailing decimal point if number is an integer
     str.erase(str.find_last_not_of('.') + 1, std::string::npos);
     
     return str;
 }
 
 int main() {
-    // 1. Create the server instance
+    // Instantiate HTTP web server
     httplib::Server svr;
 
-    // 2. Define a route for the root URL "/"
+    /* ==========================================
+       STATIC FILE ROUTING (FRONTEND ASSETS)
+       ========================================== */
+
+    // Route: Root URL "/" serves index.html
     svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
         std::string html = read_file("index.html");
         if (html.empty()) {
@@ -40,6 +52,7 @@ int main() {
         res.set_content(html, "text/html");
     });
 
+    // Route: CSS Stylesheet
     svr.Get("/style.css", [](const httplib::Request&, httplib::Response& res) {
         std::string css = read_file("style.css");
         if (css.empty()) {
@@ -50,6 +63,7 @@ int main() {
         res.set_content(css, "text/css");
     });
 
+    // Route: Client JavaScript Application Logic
     svr.Get("/script.js", [](const httplib::Request&, httplib::Response& res) {
         std::string js = read_file("script.js");
         if (js.empty()) {
@@ -60,16 +74,24 @@ int main() {
         res.set_content(js, "text/javascript");
     });
 
+    /* ==========================================
+       REST API ROUTING (EVALUATION ENGINE)
+       ========================================== */
+
+    // Endpoint: /calculate?expression=<URL_ENCODED_MATH_STRING>
     svr.Get("/calculate", [](const httplib::Request& req, httplib::Response& res) {
         std::string expression = req.get_param_value("expression");
+        
+        // Pass query parameter expression into Shunting-Yard evaluator
         double result = pemdas(expression);
         std::string r = trim_zeros(result);
 
         res.set_content(r, "text/plain");
-});
+    });
 
-    // 3. Start the server on port 8080
-    std::cout << "Server is running..." << std::flush;
+    // Start HTTP server daemon listening on all network interfaces on port 8080
+    std::cout << "Server is running on http://localhost:8080 ..." << std::flush;
     svr.listen("0.0.0.0", 8080);
+    
     return 0;
 }
