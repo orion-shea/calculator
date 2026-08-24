@@ -13,4 +13,4 @@ index.html and style.css are my frontend visual design.
 
 script.js is my calculator display and button logic, as well as talking to the backend.
 
-<img width="3456" height="2234" alt="image" src="https://github.com/user-attachments/assets/457aaffa-8640-4121-abc1-d3721d949fbf" />
+<img width="789" height="806" alt="Screenshot 2026-08-24 at 17 06 32" src="https://github.com/user-attachments/assets/facba71e-bb60-4a42-aec3-bf8d65bade79" />
