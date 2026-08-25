@@ -6,7 +6,7 @@ A full-stack, web-based mathematical calculator powered by a custom **C++ REST A
 
 ---
 
-## ⚡ Architecture Overview
+## Architecture Overview
 
 ```text
 ┌────────────────────────────────┐         HTTP GET         ┌─────────────────────────────────┐
