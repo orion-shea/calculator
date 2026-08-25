@@ -1,4 +1,4 @@
-# 🧮 C++ Powered Full-Stack Calculator
+# C++ Powered Full-Stack Calculator
 
 A full-stack, web-based mathematical calculator powered by a custom **C++ REST API engine**. Instead of relying on client-side evaluation, expression strings are sanitized in JavaScript and evaluated by a custom C++ backend using Dijkstra's **Shunting-Yard Algorithm**, backed by custom **Stack** and **Circular Queue** data structure implementations.
 
@@ -63,8 +63,8 @@ To compile and run the backend server, you will need:
 #### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/cpp-web-calculator.git
-cd cpp-web-calculator
+git clone https://github.com/orion-shea/calculator.git
+cd calculator
 ```
 
 #### 2. Compile the server
