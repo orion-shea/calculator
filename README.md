@@ -45,7 +45,7 @@ The system is split cleanly between a client-side interface and a C++ evaluation
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -89,7 +89,7 @@ http://localhost:8080
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 | File                  | Role & Key Responsibilities                                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +102,7 @@ http://localhost:8080
 
 ---
 
-## 🛠️ Key Algorithms & Logic
+## Key Algorithms & Logic
 
 ### 1. Infix to Postfix — Shunting-Yard Algorithm
 
@@ -148,7 +148,7 @@ The final result is returned as a `double` and sent back to the browser through 
 
 ---
 
-## 🔑 Key Features
+## Key Features
 
 * C++ REST API backend
 * Dijkstra's Shunting-Yard algorithm
