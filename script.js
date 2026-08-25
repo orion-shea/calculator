@@ -43,6 +43,7 @@ function normalize(event) {
   if (event.type === 'keydown') {
     // Prevent 'Enter' key from re-triggering the last clicked/focused HTML button
     if (event.key === 'Enter') event.preventDefault();
+    if (event.key === "/") event.preventDefault(); // Prevent '/' key from opening browser search
     buttonValue = event.key;
   }
 
@@ -56,7 +57,6 @@ function normalize(event) {
 
 /**
  * Checks if a new character can legally be appended based on trailing character rules.
- * Prevents appending operators/decimals after dangling spaces, parens, or minuses.
  */
 function permitInsertion(expr) {
   const lastInput = expr.current[expr.current.length - 1];
