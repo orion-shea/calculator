@@ -167,6 +167,6 @@ The final result is returned as a `double` and sent back to the browser through 
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
