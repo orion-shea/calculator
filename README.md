@@ -10,11 +10,11 @@ A full-stack, web-based mathematical calculator powered by a custom **C++ REST A
 
 ```text
 ┌────────────────────────────────┐         HTTP GET         ┌─────────────────────────────────┐
-│      Browser / Client (JS)     │ ──────────────────────> │        C++ REST Server          │
-│                                │  /calculate?expression= │                                 │
-│  • Event Handling & Input      │                          │  • Static Asset File Server    │
-│  • Parenthesis & Decimal Guard │ <────────────────────── │  • Shunting-Yard Algorithm     │
-│  • Implicit Multiplier Fix     │       "12.5" (Text)      │  • Custom Stack & Ring Queue   │
+│      Browser / Client (JS)     │ ──────────────────────>  │        C++ REST Server          │
+│                                │  /calculate?expression=  │                                 │
+│  • Event Handling & Input      │                          │  • Static Asset File Server     │
+│  • Parenthesis & Decimal Guard │ <──────────────────────  │  • Shunting-Yard Algorithm      │
+│  • Implicit Multiplier Fix     │       "12.5" (Text)      │  • Custom Stack & Ring Queue    │
 └────────────────────────────────┘                          └─────────────────────────────────┘
 ```
 
